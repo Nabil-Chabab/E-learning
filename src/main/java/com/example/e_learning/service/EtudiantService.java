@@ -33,12 +33,23 @@ public class EtudiantService {
     public Etudiant updateEtudiant(String id, Etudiant etudiant) {
         Optional<Etudiant> existingEtudiant = etudiantRepository.findById(id);
         if (existingEtudiant.isPresent()) {
-            etudiant.setId(id);
-            return etudiantRepository.save(etudiant);
+            Etudiant updatedEtudiant = existingEtudiant.get();
+            // Mettre à jour tous les champs, y compris le mot de passe
+            updatedEtudiant.setCin(etudiant.getCin());
+            updatedEtudiant.setCne(etudiant.getCne());
+            updatedEtudiant.setImageURL(etudiant.getImageURL());
+            updatedEtudiant.setModules(etudiant.getModules());
+            updatedEtudiant.setApogee(etudiant.getApogee());
+            updatedEtudiant.setEmail(etudiant.getEmail());
+            updatedEtudiant.setNom(etudiant.getNom());
+            updatedEtudiant.setPrenom(etudiant.getPrenom());
+            updatedEtudiant.setMotDePasse(etudiant.getMotDePasse()); // IMPORTANT
+            return etudiantRepository.save(updatedEtudiant);
         } else {
             throw new RuntimeException("Étudiant non trouvé");
         }
     }
+
 
     // Supprimer un étudiant
     public String deleteEtudiant(String id) {
