@@ -5,12 +5,30 @@ import com.example.e_learning.model.SupportType;
 import com.example.e_learning.model.Semester;
 import com.example.e_learning.repository.SupportRepository;
 import com.example.e_learning.service.SupportService;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*
  rachid
  */
@@ -19,9 +37,11 @@ import java.util.Optional;
  * Les supports sont des documents qui peuvent être filtrés par type ou semestre.
  */
 @RestController
+@CrossOrigin(origins = "http://localhost:8082") // Si vous utilisez React
 @RequestMapping("/api/supports")
-@CrossOrigin(origins = "http://localhost:3000") // Permettre les requêtes du front-end (React) si activé
+
 public class SupportController {
+    private static final Logger logger = LoggerFactory.getLogger(SupportController.class);
 
     // Injection du service pour gérer la logique métier
     @Autowired
@@ -133,4 +153,45 @@ public class SupportController {
             return ResponseEntity.notFound().build();
         }
     }
+    @Autowired
+    private SupportService SupportService;
+    //here
+    @GetMapping("/download/{id}")
+    public ResponseEntity<?> downloadSupport(@PathVariable String id) {
+        Support support = supportService.getSupportById(id);
+        if (support == null || support.getFichierUrl() == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Support introuvable ou URL de fichier manquante.");
+        }
+
+        try {
+            // Définir le chemin de base pour les fichiers
+            String baseDirectory = "uploads"; // Répertoire de base des fichiers
+            Path filePath = Paths.get(baseDirectory).resolve(support.getFichierUrl()).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+
+            if (!resource.exists()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Fichier introuvable : " + filePath.toString());
+            }
+
+            // Détecter le type MIME
+            String contentType = Files.probeContentType(filePath);
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+
+            // Retourner la réponse avec le fichier
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filePath.getFileName().toString() + "\"")
+                    .body(resource);
+
+        } catch (IOException e) {
+            // Log en cas d'erreur
+            logger.error("Erreur lors du téléchargement du fichier pour ID : " + id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur interne : impossible de télécharger le fichier.");
+        }
+    }
+
+
 }
