@@ -13,14 +13,14 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/professeur")
+@RequestMapping("/api/professeurs")
 public class ProfesseurControllerTest {
 
     @Autowired
     private Professeurservice professeurService;
 
     // Create a new professeur
-    @PostMapping("/add")
+    @PostMapping
     public ResponseEntity<Professeur> createProfesseur(@RequestBody Professeur professeur) {
         Professeur createdProfesseur = professeurService.createProfesseur(professeur);
         return ResponseEntity.ok(createdProfesseur);
@@ -34,7 +34,7 @@ public class ProfesseurControllerTest {
     }
 
     // Get a professeur by ID
-    @GetMapping("/get/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Professeur> getProfesseurById(@PathVariable String id) {
         Optional<Professeur> professeur = professeurService.getProfesseurById(id);
         return professeur.map(ResponseEntity::ok)
@@ -42,14 +42,14 @@ public class ProfesseurControllerTest {
     }
 
     // Update a professeur
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Professeur> updateProfesseur(@PathVariable String id, @RequestBody Professeur professeur) {
         Professeur updatedProfesseur = professeurService.updateProfesseur(id, professeur);
         return ResponseEntity.ok(updatedProfesseur);
     }
 
     // Delete a professeur
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProfesseur(@PathVariable String id) {
         professeurService.deleteProfesseur(id);
         return ResponseEntity.noContent().build();
