@@ -85,7 +85,7 @@ public class ProfesseurControllerTest {
         professeurService.deleteAnnonceByProfesseur(professeurId, annonceId);
         return ResponseEntity.noContent().build();
     }
-    //get admin profile par ikram
+    //get admin profile
     @GetMapping("/admin/profile/{id}")
     public ResponseEntity<Professeur> getAdminProfile(@PathVariable String id) {
     if (professeurService.isAdmin(id)) {
@@ -95,7 +95,7 @@ public class ProfesseurControllerTest {
     }
     return ResponseEntity.status(403).build(); // Forbidden si non-admin
 }
-    //update admin profile par ikram
+    //update admin profile
   
     @PutMapping("/admin/update/{id}")
     public ResponseEntity<Professeur> updateAdminProfile(@PathVariable String id, @RequestBody Professeur professeur) {
