@@ -1,4 +1,4 @@
-version: '3.8'
+
 
 services:
   # Zipkin for distributed tracing
@@ -33,59 +33,6 @@ services:
     depends_on:
       - prometheus
 
-  # Elasticsearch for log storage
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
-    environment:
-      - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-    ports:
-      - "9200:9200"
-    volumes:
-      - es_data:/usr/share/elasticsearch/data
-    networks:
-      - elk
 
-  # Kibana for log visualization
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.10.1
-    ports:
-      - "5601:5601"
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    depends_on:
-      - elasticsearch
-    networks:
-      - elk
 
-  # Logstash for log processing
-  logstash:
-    image: docker.elastic.co/logstash/logstash:7.10.1
-    volumes:
-      - ./logstash/pipeline/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml
-    ports:
-      - "5000:5000"  # Pour recevoir les logs de Spring Boot
-    depends_on:
-      - elasticsearch
-    networks:
-      - elk
 
-  # Spring Boot application (post-service)
-  post-service:
-    build:
-      context: ./E-learning  # Chemin vers votre Dockerfile
-      dockerfile: Dockerfile  # Nom du Dockerfile
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
-    depends_on:
-      - logstash
-    networks:
-      - elk
-
-networks:
-  elk:
-    driver: bridge
-
-volumes:
-  es_data:

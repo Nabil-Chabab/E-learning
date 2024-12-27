@@ -12,7 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 import java.util.Optional;
-
+@CrossOrigin(origins = "http://localhost:3001")
 @RestController
 @RequestMapping("/Annonce")
 public class AnnonceControllerTest {
